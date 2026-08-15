@@ -784,23 +784,7 @@
         console.error("Error al liberar:", error);
         await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
       }
-    };    // LIBERAR CASILLA EN AMBAS RAMAS
-    document.getElementById('btn-liberar-casilla').onclick = async () => {
-      if (!casillaSeleccionada) return;
-      
-      const payloadPublico = { e: 0, vk: vendorKey };
-      const payloadPrivado = { t: "", v: "", vk: vendorKey };
-
-      try {
-        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payloadPublico);
-        await set(ref(db, `rifas_privadas/${fechaHoy}/${casillaSeleccionada}`), payloadPrivado);
-        cerrarModales();
-      } catch (error) {
-        console.error("Error al liberar:", error);
-        await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
-      }
     };
-
     function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
       return new Promise((resolve) => {
         const modal = document.getElementById('modal-dialogo');
@@ -877,8 +861,15 @@
           const pinIngresado = await pedirDato("Acceso Administrador", "Introduce el PIN de seguridad:", "", "password");
           if (!pinIngresado) return;
 
-          const pinSnap = await get(ref(db, 'config/adminPin'));
-          const pinReal = pinSnap.val() || "778899";
+          let pinReal = "778899";
+          try {
+            const pinSnap = await get(ref(db, 'config/adminPin'));
+            if (pinSnap.exists() && pinSnap.val()) {
+              pinReal = String(pinSnap.val());
+            }
+          } catch (e) {
+            console.log("PIN leído con fallback local");
+          }
 
           if (pinIngresado === String(pinReal)) {
             const opcion = await pedirDato(
@@ -895,7 +886,8 @@
                 const idCarton = "carton_" + Date.now();
                 await set(ref(db, `config/cartones/${idCarton}`), {
                   nombre: nomCarton,
-                  precio: precioCarton || "2000"
+                  precio: precioCarton || "2000",
+                  vk: vendorKey
                 });
                 await mostrarAlerta(`Cartón "${nomCarton}" creado exitosamente.`, "Éxito");
               }
@@ -921,8 +913,8 @@
               if (f) {
                 await set(ref(db, 'config/activeDate'), f);
               }
-            }          } else {
-            await mostrarAlerta("El PIN ingresado es incorrecto.", "Acceso Denegado");
+            }
+          } else {            await mostrarAlerta("El PIN ingresado es incorrecto.", "Acceso Denegado");
           }
         }
       } else {
