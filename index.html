@@ -7,7 +7,7 @@
   <style>
     :root {
       --gold-main: #fab814;
-      --gold-dark: #e8b017; /* Amarillo balanceado no chillón */
+      --gold-dark: #e8b017;
       --green-dark: #073819;
       --green-card: #0d4d24;
       --green-pagado: #0e4822;
@@ -24,7 +24,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 6px 0 18px; /* 0 padding lateral para permitir full-width */
+      padding: 6px 0 18px;
       overflow-x: hidden;
     }
 
@@ -51,9 +51,8 @@
       user-select: none;
     }
     .clover { font-size: 1.8rem; cursor: pointer; }
-    .lock-sm { font-size: 0.95rem; opacity: 0.7; vertical-align: middle; }
 
-    /* BANNER VALOR PUESTO CON MARGEN */
+    /* BANNER VALOR PUESTO */
     .banner-valor {
       background: var(--green-dark);
       display: flex;
@@ -78,7 +77,7 @@
       font-weight: 900;
     }
 
-    /* FRANJA FECHA Y HORA: FULL-BLEED DE BORDE A BORDE */
+    /* FRANJA FECHA Y HORA */
     .info-sorteo {
       background: #b57a06;
       width: 100vw !important;
@@ -95,7 +94,7 @@
       border: none;
     }
 
-    /* FRANJA MOTILÓN: FULL-BLEED DE BORDE A BORDE */
+    /* FRANJA MOTILÓN */
     .banner-sorteo {
       background: #000000;
       color: #ffffff;
@@ -115,7 +114,7 @@
       border: none;
     }
 
-    /* FRANJA NEQUI: FULL-BLEED DE BORDE A BORDE */
+    /* FRANJA NEQUI */
     .banner-nequi {
       background: #d8dcda;
       width: 100vw !important;
@@ -172,7 +171,7 @@
     .tag-apar { background: var(--amber-apartado); color: #ffffff; }
     .tag-paga { background: var(--green-pagado); color: #ffffff; }
 
-    /* TABLERO 10x10 CON MARGEN LATERAL */
+    /* TABLERO 10x10 */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
@@ -212,7 +211,6 @@
       max-width: 96%;
     }
 
-    /* MODOS DE CASILLA */
     .casilla.apartado {
       background: var(--amber-apartado);
       color: #ffffff;
@@ -233,7 +231,7 @@
       border-radius: 2px;
     }
 
-    /* FOOTER DE PREMIOS 3 COLUMNAS CON MARGEN */
+    /* FOOTER PREMIOS */
     .prizes-footer {
       display: flex;
       justify-content: space-between;
@@ -262,15 +260,8 @@
       color: #d1e7dd;
       line-height: 1.1;
     }
-    .prizes-footer .lock-corner {
-      position: absolute;
-      top: 3px;
-      right: 6px;
-      font-size: 0.75rem;
-      opacity: 0.6;
-    }
 
-    /* MODAL DE GANADORES IDÉNTICO A LA FOTO */
+    /* MODALES */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -359,7 +350,6 @@
       cursor: pointer;
     }
 
-    /* MODAL DE EDICIÓN */
     .form-box {
       background: #ffffff;
       border-radius: 12px;
@@ -385,7 +375,6 @@
       margin-bottom: 5px;
     }
 
-    /* DIÁLOGO / MODAL PERSONALIZADO ELEGANTE */
     .dialog-box {
       background: var(--gold-dark);
       border: 3px solid var(--gold-main);
@@ -455,17 +444,17 @@
       <span class="lbl-vp-num">$<span id="lbl-precio">2,000</span></span>
     </div>
 
-    <!-- FECHA Y HORA EN VIVO (FULL WIDTH) -->
+    <!-- FECHA Y HORA EN VIVO -->
     <div class="info-sorteo">
       <span id="lbl-fecha-texto">Cargando fecha...</span> | <span id="lbl-hora">🕒 00:00</span>
     </div>
 
-    <!-- BANNER MOTILÓN (FULL WIDTH) -->
+    <!-- BANNER MOTILÓN -->
     <div class="banner-sorteo">
       <span>SORTEO DIARIO CON MOTILÓN NOCHE 9 PM</span>
     </div>
 
-    <!-- BANNER NEQUI (FULL WIDTH) -->
+    <!-- BANNER NEQUI -->
     <div class="banner-nequi" id="btn-nequi">
       <span class="nequi-title">NEQUI:</span>
       <span class="nequi-num" id="lbl-nequi">3208023361</span>
@@ -484,7 +473,7 @@
     <!-- CUADRÍCULA 100 NÚMEROS -->
     <div class="grid-container" id="tablero"></div>
 
-    <!-- FOOTER PREMIOS (3 COLUMNAS) -->
+    <!-- FOOTER PREMIOS -->
     <div class="prizes-footer">
       <div class="prize-box">
         <div class="prize-amount">$100k</div>
@@ -502,7 +491,7 @@
 
   </div>
 
-  <!-- MODAL 1: GANADORES (RÉPLICA EXACTA DE LA IMAGEN) -->
+  <!-- MODAL GANADORES -->
   <div class="modal-overlay" id="modal-ganadores">
     <div class="winners-card">
       <h2 class="winners-title">¡FELICIDADES GANADORES!</h2>
@@ -544,7 +533,7 @@
     </div>
   </div>
 
-  <!-- MODAL DIÁLOGO DINÁMICO (SIN PROMPT DEL NAVEGADOR) -->
+  <!-- MODAL DIÁLOGO DINÁMICO -->
   <div class="modal-overlay" id="modal-dialogo">
     <div class="dialog-box">
       <h3 id="diag-titulo">Ingresar Dato</h3>
@@ -557,7 +546,8 @@
     </div>
   </div>
 
-  <!-- MODAL 2: EDICIÓN DE CASILLA -->  <div class="modal-overlay" id="modal-casilla">
+  <!-- MODAL EDICIÓN DE CASILLA -->
+  <div class="modal-overlay" id="modal-casilla">
     <div class="form-box">
       <h3 style="margin-bottom:8px;">Número: <span id="f-num">00</span></h3>
       <label style="font-size:0.75rem; font-weight:bold;">Estado:</label>
@@ -595,7 +585,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // GESTIÓN DEL TIEMPO REAL Y FECHA EN ESPAÑOL
     function actualizarReloj() {
       const ahora = new Date();
       const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -628,7 +617,8 @@
       vendorKey = localStorage.getItem('vendedor_key') || '';
     }
     const esVendedor = Boolean(vendorKey);
-    // GENERAR LA CUADRÍCULA 00-99
+
+    // GENERAR CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
     for (let i = 0; i < 100; i++) {
       const num = i.toString().padStart(2, '0');
@@ -652,7 +642,6 @@
       onChildRemoved(diaRef, (snap) => limpiarCasillaDOM(snap.key));
     }
 
-    // SINCRONIZACIÓN EN TIEMPO REAL: FECHA ACTIVA Y VALOR DE PUESTO
     onValue(ref(db, 'config/activeDate'), (snap) => {
       const f = snap.val() || getFechaCol();
       if (f !== fechaHoy || !diaRef) suscribirTablero(f);
@@ -661,6 +650,7 @@
     onValue(ref(db, 'config/valorPuesto'), (snap) => {
       if (snap.val()) document.getElementById('lbl-precio').textContent = snap.val();
     });
+
     function actualizarCasillaDOM(num, data) {
       if (!data) return;
       datosTablero[num] = data;
@@ -681,7 +671,6 @@
       document.getElementById(`tag-${num}`).textContent = '';
     }
 
-    // GESTIÓN DE CASILLAS
     function clickCasilla(num) {
       if (!esVendedor) {
         return;
@@ -706,7 +695,7 @@
       document.getElementById('modal-casilla').style.display = 'flex';
     }
 
-    // GUARDAR CASILLA CUMPLIENDO LA REGLA DE FIREBASE (VK)
+    // GUARDAR CASILLA CON LA CLAVE VK DE FIREBASE
     document.getElementById('btn-guardar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
       
@@ -720,7 +709,6 @@
         localStorage.setItem('mi_id_vendedor', vendedor);
       }
 
-      // IMPORTANTE: Se envía vk con la clave de la URL para que Firebase apruebe la escritura
       const payload = {
         e: estado,
         d: dias,
@@ -735,7 +723,7 @@
         cerrarModales();
       } catch (error) {
         console.error("Error al guardar:", error);
-        await mostrarAlerta("Error de permisos en Firebase: " + error.message, "Error");
+        await mostrarAlerta("Error al guardar en Firebase: " + error.message, "Error");
       }
     };
 
@@ -751,7 +739,6 @@
       }
     };
 
-    // GESTOR DE DIÁLOGOS PERSONALIZADOS (REEMPLAZO DE PROMPT/ALERT)
     function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
       return new Promise((resolve) => {
         const modal = document.getElementById('modal-dialogo');
@@ -788,7 +775,6 @@
       return pedirDato(titulo, mensaje, '', 'hidden');
     }
 
-    // GANADORES: 6 DÍGITOS SIN PROMPTS DEL NAVEGADOR
     window.abrirIngresoLoteria = async function() {
       const numero6D = await pedirDato("Sorteo de Lotería", "Ingresa el número oficial de 6 dígitos:", "133002", "number");
       if (!numero6D || numero6D.length < 6) {
@@ -815,7 +801,6 @@
 
     document.getElementById('btn-calc-ganadores').onclick = () => abrirIngresoLoteria();
 
-    // SECUENCIA ADMIN SIN PROMPT DEL NAVEGADOR
     let seq = 0;
     document.getElementById('clover-left').onclick = () => { seq = 1; };
     document.getElementById('clover-right').onclick = () => { if (seq === 1) seq = 2; else seq = 0; };
@@ -847,7 +832,8 @@
                 await set(ref(db, 'config/vendorKey'), nuevaClave);
                 await mostrarAlerta(`Clave guardada en Firebase. Tu enlace de vendedores será: ?key=${nuevaClave}`, "Éxito");
               }
-            } else if (opcion === "2") {              const nuevoVal = await pedirDato("Valor Puesto", "Escribe el valor del puesto:", document.getElementById('lbl-precio').textContent);
+            } else if (opcion === "2") {
+              const nuevoVal = await pedirDato("Valor Puesto", "Escribe el valor del puesto:", document.getElementById('lbl-precio').textContent);
               if (nuevoVal) {
                 await set(ref(db, 'config/valorPuesto'), nuevoVal);
               }
@@ -878,7 +864,6 @@
       document.getElementById('modal-dialogo').style.display = 'none';
     };
 
-    // BÚSQUEDA DE CLIENTE CON INTERFAZ INTEGRADA
     window.filtrarTablero = async function() {
       const q = await pedirDato("Buscar Cliente", "Escribe el nombre del comprador:", "");
       if (q === null) return;
@@ -900,7 +885,6 @@
       }
     };
 
-    // ESCALADO VECTORIAL: HACE CRECER TODO HACIA ABAJO EN PANTALLAS GRANDES
     function ajustarEscalaVertical() {
       const app = document.querySelector('.app-container');
       if (!app) return;
