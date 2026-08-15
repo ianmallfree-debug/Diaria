@@ -674,8 +674,17 @@
     // CONFIGURACIÓN DEL WORKER Y MODO VENDEDOR
     const WORKER_URL = "https://diaria.ianmallfree.workers.dev";
     const urlParams = new URLSearchParams(window.location.search);
-    let vendorKey = urlParams.get('key') || localStorage.getItem('vendor_key') || '';
-    let vendorAlias = urlParams.get('v') || localStorage.getItem('vendor_alias') || 'Vendedor General';
+    
+    // Si viene en la URL, tiene prioridad absoluta y actualiza la memoria
+    if (urlParams.has('key')) {
+      localStorage.setItem('vendor_key', urlParams.get('key').trim());
+    }
+    if (urlParams.has('v')) {
+      localStorage.setItem('vendor_alias', urlParams.get('v').trim());
+    }
+
+    let vendorKey = localStorage.getItem('vendor_key') || '';
+    let vendorAlias = localStorage.getItem('vendor_alias') || 'Vendedor General';
 
     // Generar o recuperar huella única de este dispositivo
     let deviceId = localStorage.getItem('app_device_id');
@@ -686,12 +695,10 @@
       localStorage.setItem('app_device_id', deviceId);
     }
 
-    if (urlParams.has('key')) {
-      localStorage.setItem('vendor_key', vendorKey);
-      if (urlParams.has('v')) localStorage.setItem('vendor_alias', vendorAlias);
+    if (urlParams.has('key') || urlParams.has('v')) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-    const esVendedor = vendorKey.length > 0;  
+    const esVendedor = vendorKey.length > 0;
     // GENERAR CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
     for (let i = 0; i < 100; i++) {
