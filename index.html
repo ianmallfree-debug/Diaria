@@ -668,7 +668,7 @@
     }
 
     // GESTIÓN DE CASILLAS
-    function clickCasilla(num) {
+    async function clickCasilla(num) {
       if (!esVendedor) {
         return;
       }
@@ -680,8 +680,20 @@
         document.getElementById('f-estado').value = data.e;
         document.getElementById('f-dias').value = data.d || 1;
         document.getElementById('f-nombre').value = data.n || '';
-        document.getElementById('f-tel').value = data.t || '';
-        document.getElementById('f-vendedor').value = data.v || '';
+        
+        // Limpiar y cargar datos privados solo para vendedores autorizados
+        document.getElementById('f-tel').value = '';
+        document.getElementById('f-vendedor').value = '';
+        try {
+          const privSnap = await get(ref(db, `rifas_privadas/${fechaHoy}/${num}`));
+          if (privSnap.exists()) {
+            const privData = privSnap.val();
+            document.getElementById('f-tel').value = privData.t || '';
+            document.getElementById('f-vendedor').value = privData.v || '';
+          }
+        } catch (e) {
+          console.log("Error al leer info privada", e);
+        }
       } else {
         document.getElementById('f-estado').value = 1;
         document.getElementById('f-dias').value = 1;
@@ -692,7 +704,7 @@
       document.getElementById('modal-casilla').style.display = 'flex';
     }
 
-    // GUARDAR CASILLA CON LA CLAVE RECUPERADA DE LA URL (SIN HARDCODEAR NADA)
+    // GUARDAR CASILLA: SEPARA DATOS PÚBLICOS DE PRIVADOS
     document.getElementById('btn-guardar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
       
@@ -706,17 +718,24 @@
         localStorage.setItem('mi_id_vendedor', vendedor);
       }
 
-      const payload = {
+      // DATOS PÚBLICOS (Solo lo necesario para pintar el tablero sin teléfonos)
+      const payloadPublico = {
         e: estado,
         d: dias,
         n: nombre,
+        vk: vendorKey
+      };
+
+      // DATOS PRIVADOS (Teléfono y Vendedor van a una rama protegida)
+      const payloadPrivado = {
         t: tel,
         v: vendedor,
         vk: vendorKey
       };
 
       try {
-        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payload);
+        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payloadPublico);
+        await set(ref(db, `rifas_privadas/${fechaHoy}/${casillaSeleccionada}`), payloadPrivado);
         cerrarModales();
       } catch (error) {
         console.error("Error al guardar:", error);
@@ -724,17 +743,16 @@
       }
     };
 
-    // LIBERAR CASILLA SEGURA (ENVÍA VK PARA VALIDAR PERMISOS EN FIREBASE)
+    // LIBERAR CASILLA EN AMBAS RAMAS
     document.getElementById('btn-liberar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
       
-      const payload = {
-        e: 0,
-        vk: vendorKey
-      };
+      const payloadPublico = { e: 0, vk: vendorKey };
+      const payloadPrivado = { t: "", v: "", vk: vendorKey };
 
       try {
-        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payload);
+        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payloadPublico);
+        await set(ref(db, `rifas_privadas/${fechaHoy}/${casillaSeleccionada}`), payloadPrivado);
         cerrarModales();
       } catch (error) {
         console.error("Error al liberar:", error);
