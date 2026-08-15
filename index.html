@@ -619,6 +619,15 @@
     let casillaSeleccionada = null;
     let diaRef = null;
 
+    // DETECTAR MODO VENDEDOR VÍA URL (?key=CLAVE)
+    const urlParams = new URLSearchParams(window.location.search);
+    let vendorKey = urlParams.get('key');
+    if (vendorKey) {
+      localStorage.setItem('vendedor_key', vendorKey);
+    } else {
+      vendorKey = localStorage.getItem('vendedor_key') || '';
+    }
+    const esVendedor = Boolean(vendorKey);
     // GENERAR LA CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
     for (let i = 0; i < 100; i++) {
@@ -674,6 +683,9 @@
 
     // GESTIÓN DE CASILLAS
     function clickCasilla(num) {
+      if (!esVendedor) {
+        return;
+      }
       casillaSeleccionada = num;
       document.getElementById('f-num').textContent = num;
       const data = datosTablero[num];
@@ -694,21 +706,7 @@
       document.getElementById('modal-casilla').style.display = 'flex';
     }
 
-    document.getElementById('btn-guardar-casilla').onclick = () => {
-      const v = document.getElementById('f-vendedor').value.trim();
-      if(v) localStorage.setItem('mi_id_vendedor', v);
-
-      const payload = {
-        e: parseInt(document.getElementById('f-estado').value),
-        d: parseInt(document.getElementById('f-dias').value) || 1,
-        n: document.getElementById('f-nombre').value.trim(),
-        t: document.getElementById('f-tel').value.trim(),
-        v: v,
-        ts: Date.now()
-      };
-      set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payload);
-      cerrarModales();
-    };
+    v
 
     document.getElementById('btn-liberar-casilla').onclick = () => {
       remove(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`));
@@ -800,39 +798,18 @@
           if (pinIngresado === String(pinReal)) {
             const opcion = await pedirDato(
               "Panel Administrador",
-              "1: Limpiar Tablero / Nuevo Sorteo | 2: Precio Puesto | 3: Cambiar PIN | 4: Cambiar Fecha Manual",
+              "1: Limpiar Tablero | 2: Precio Puesto | 3: Cambiar PIN | 4: Cambiar Fecha | 5: Definir Clave Vendedores",
               "1",
               "number"
             );
 
-            if (opcion === "1") {
-              const confirmar = await pedirDato("Confirmar Limpieza", "¿Escribe 'SI' para archivar y crear nuevo sorteo?:", "");
-              if (confirmar && confirmar.toUpperCase() === "SI") {
-                const snapActual = await get(ref(db, `rifas/${fechaHoy}`));
-                const dataActual = snapActual.val() || {};
-
-                // 1. Guardar copia histórica del día
-                await set(ref(db, `historico/${fechaHoy}`), dataActual);
-
-                // 2. Procesar apartados: reducir 1 día y eliminar vencidos/pagados
-                const nuevoTablero = {};
-                let conservados = 0;
-                for (const [k, item] of Object.entries(dataActual)) {
-                  if (item.e === 1 && item.d > 1) {
-                    nuevoTablero[k] = { ...item, d: item.d - 1, ts: Date.now() };
-                    conservados++;
-                  }
-                }
-
-                // 3. Crear nueva fecha y actualizar en todos los celulares
-                const nuevaFecha = getFechaCol();
-                await set(ref(db, `rifas/${nuevaFecha}`), nuevoTablero);
-                await set(ref(db, 'config/activeDate'), nuevaFecha);
-
-                await mostrarAlerta(`Sorteo reiniciado. ${conservados} apartados conservados (-1 día). Histórico guardado.`, "Éxito");
+            if (opcion === "5") {
+              const nuevaClave = await pedirDato("Clave Vendedores", "Escribe la nueva clave secreta para vendedores:", "");
+              if (nuevaClave) {
+                await set(ref(db, 'config/vendorKey'), nuevaClave);
+                await mostrarAlerta(`Clave guardada en Firebase. Tu enlace de vendedores será: ?key=${nuevaClave}`, "Éxito");
               }
-            } else if (opcion === "2") {
-              const nuevoVal = await pedirDato("Valor Puesto", "Escribe el valor del puesto:", document.getElementById('lbl-precio').textContent);
+            } else if (opcion === "2") {              const nuevoVal = await pedirDato("Valor Puesto", "Escribe el valor del puesto:", document.getElementById('lbl-precio').textContent);
               if (nuevoVal) {
                 await set(ref(db, 'config/valorPuesto'), nuevoVal);
               }
