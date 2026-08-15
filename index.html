@@ -708,16 +708,16 @@
         document.getElementById('f-nombre').value = data.n || '';
         
         document.getElementById('f-tel').value = '';
-        document.getElementById('f-vendedor').value = '';
-        try {
-          const privSnap = await get(ref(db, `rifas_privadas/${cartonActual}/${num}`));
-          if (privSnap.exists()) {
-            const privData = privSnap.val();
-            document.getElementById('f-tel').value = privData.t || '';
-            document.getElementById('f-vendedor').value = privData.v || '';
+        document.getElementById('f-vendedor').value = '';try {
+          if (vendorKey) {
+            const privSnap = await get(ref(db, `rifas_privadas/${vendorKey}/${cartonActual}/${num}`));
+            if (privSnap.exists()) {
+              const privData = privSnap.val();
+              document.getElementById('f-tel').value = privData.t || '';
+              document.getElementById('f-vendedor').value = privData.v || '';
+            }
           }
-        } catch (e) {
-          console.log("Error al leer info privada", e);
+        } catch (e) {          console.log("Error al leer info privada", e);
         }
       } else {
         document.getElementById('f-estado').value = 1;
@@ -777,11 +777,12 @@
       try {
         const updates = {};
         updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
-        updates[`rifas_privadas/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
+        if (vendorKey) {
+          updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
+        }
         await update(ref(db), updates);
         cerrarModales();
-      } catch (error) {
-        console.error("Error al liberar:", error);
+      } catch (error) {        console.error("Error al liberar:", error);
         await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
       }
     };
@@ -893,10 +894,11 @@
                 };
                 
                 // DATOS PRIVADOS (La clave vk se envía únicamente a rifas_privadas)
-                updates[`rifas_privadas/${idCarton}/init`] = {
-                  vk: vendorKey
-                };
-                
+                if (vendorKey) {
+                  updates[`rifas_privadas/${vendorKey}/${idCarton}/init`] = {
+                    vk: vendorKey
+                  };
+                }                
                 await update(ref(db), updates);
                 await mostrarAlerta(`Cartón "${nomCarton}" creado exitosamente.`, "Éxito");
               }
