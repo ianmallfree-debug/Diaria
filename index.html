@@ -556,8 +556,7 @@
       <label style="font-size:0.75rem; font-weight:bold;">Teléfono WhatsApp:</label>
       <input type="tel" id="f-tel" placeholder="Ej: 3001234567">
 
-      <label style="font-size:0.75rem; font-weight:bold;">Vendedor:</label>
-      <input type="text" id="f-vendedor" placeholder="Teléfono 7">
+      <!-- Identidad de vendedor gestionada automáticamente -->
 
       <button class="btn-act" style="background:#0e4822; color:white;" id="btn-guardar-casilla">Guardar</button>
       <button class="btn-act" style="background:#d90429; color:white;" id="btn-liberar-casilla">Liberar Casilla</button>
@@ -602,12 +601,23 @@
     const WORKER_URL = "https://diaria.ianmallfree.workers.dev";
     const urlParams = new URLSearchParams(window.location.search);
     let vendorKey = urlParams.get('key') || localStorage.getItem('vendor_key') || '';
+    let vendorAlias = urlParams.get('v') || localStorage.getItem('vendor_alias') || 'Vendedor General';
+
+    // Generar o recuperar huella única de este dispositivo
+    let deviceId = localStorage.getItem('app_device_id');
+    if (!deviceId) {
+      deviceId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('app_device_id', deviceId);
+    }
+
     if (urlParams.has('key')) {
       localStorage.setItem('vendor_key', vendorKey);
+      if (urlParams.has('v')) localStorage.setItem('vendor_alias', vendorAlias);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-    const esVendedor = vendorKey.length > 0;
-    
+    const esVendedor = vendorKey.length > 0;  
     // GENERAR CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
     for (let i = 0; i < 100; i++) {
@@ -708,17 +718,18 @@
         document.getElementById('f-dias').value = data.d || 1;
         document.getElementById('f-nombre').value = data.n || '';
         document.getElementById('f-tel').value = '';
-        document.getElementById('f-vendedor').value = '';
 
         if (vendorKey) {
           try {
             const res = await fetch(`${WORKER_URL}/api/obtener-privado?carton=${cartonActual}&num=${num}`, {
-              headers: { 'X-Vendor-Key': vendorKey }
+              headers: { 
+                'X-Vendor-Key': vendorKey,
+                'X-Vendor-Alias': vendorAlias 
+              }
             });
             if (res.ok) {
               const privData = await res.json();
               document.getElementById('f-tel').value = privData.t || '';
-              document.getElementById('f-vendedor').value = privData.v || '';
             }
           } catch (e) {
             console.log("Error al leer info privada vía Worker", e);
@@ -729,10 +740,10 @@
         document.getElementById('f-dias').value = 1;
         document.getElementById('f-nombre').value = '';
         document.getElementById('f-tel').value = '';
-        document.getElementById('f-vendedor').value = localStorage.getItem('mi_id_vendedor') || '';
       }
       document.getElementById('modal-casilla').style.display = 'flex';
-    }
+    }    
+    
     // GUARDAR CASILLA VÍA WORKER
     document.getElementById('btn-guardar-casilla').onclick = async () => {
       if (!casillaSeleccionada || !vendorKey) {
@@ -744,16 +755,15 @@
       const dias = parseInt(document.getElementById('f-dias').value) || 1;
       const nombre = document.getElementById('f-nombre').value.trim();
       const tel = document.getElementById('f-tel').value.trim();
-      const vendedor = document.getElementById('f-vendedor').value.trim();
-
-      if (vendedor) localStorage.setItem('mi_id_vendedor', vendedor);
 
       try {
         const res = await fetch(`${WORKER_URL}/api/guardar-casilla`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Vendor-Key': vendorKey
+            'X-Vendor-Key': vendorKey,
+            'X-Vendor-Alias': vendorAlias,
+            'X-Device-Id': deviceId
           },
           body: JSON.stringify({
             carton: cartonActual,
@@ -761,8 +771,7 @@
             e: estado,
             d: dias,
             n: nombre,
-            t: tel,
-            v: vendedor
+            t: tel
           })
         });
 
@@ -770,7 +779,7 @@
           cerrarModales();
         } else {
           const err = await res.json();
-          await mostrarAlerta(err.error || "Acceso denegado: Clave inválida.", "Error de Seguridad");
+          await mostrarAlerta(err.error || "Acceso denegado.", "Error de Seguridad");
         }
       } catch (error) {
         console.error("Error al guardar:", error);
@@ -778,7 +787,7 @@
       }
     };
 
-    // LIBERAR CASILLA VÍA WORKER
+// LIBERAR CASILLA VÍA WORKER
     document.getElementById('btn-liberar-casilla').onclick = async () => {
       if (!casillaSeleccionada || !vendorKey) {
         await mostrarAlerta("No tienes autorización para liberar esta casilla.", "Acceso Denegado");
@@ -790,7 +799,9 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Vendor-Key': vendorKey
+            'X-Vendor-Key': vendorKey,
+            'X-Vendor-Alias': vendorAlias,
+            'X-Device-Id': deviceId
           },
           body: JSON.stringify({
             carton: cartonActual,
@@ -802,14 +813,14 @@
           cerrarModales();
         } else {
           const err = await res.json();
-          await mostrarAlerta(err.error || "Acceso denegado: Clave inválida.", "Error de Seguridad");
+          await mostrarAlerta(err.error || "Acceso denegado.", "Error de Seguridad");
         }
       } catch (error) {
         console.error("Error al liberar:", error);
         await mostrarAlerta("Error al conectar con el servidor.", "Error de Seguridad");
       }
     };
-        function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
+    function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
       return new Promise((resolve) => {
         const modal = document.getElementById('modal-dialogo');
         const input = document.getElementById('diag-input');
