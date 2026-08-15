@@ -727,9 +727,12 @@
       }
       document.getElementById('modal-casilla').style.display = 'flex';
     }
-    // GUARDAR CASILLA EN EL CARTÓN ACTUAL
+    // GUARDAR CASILLA VÍA WORKER
     document.getElementById('btn-guardar-casilla').onclick = async () => {
-      if (!casillaSeleccionada) return;
+      if (!casillaSeleccionada || !vendorKey) {
+        await mostrarAlerta("Acceso denegado: Sin clave de vendedor.", "Error de Seguridad");
+        return;
+      }
       
       const estado = parseInt(document.getElementById('f-estado').value) || 1;
       const dias = parseInt(document.getElementById('f-dias').value) || 1;
@@ -737,34 +740,69 @@
       const tel = document.getElementById('f-tel').value.trim();
       const vendedor = document.getElementById('f-vendedor').value.trim();
 
-      if (vendedor) {
-        localStorage.setItem('mi_id_vendedor', vendedor);
-      }
-
-      const payloadPublico = {
-        e: estado,
-        d: dias,
-        n: nombre
-      };
-
-      const payloadPrivado = {
-        t: tel,
-        v: vendedor,
-        vk: vendorKey
-      };
+      if (vendedor) localStorage.setItem('mi_id_vendedor', vendedor);
 
       try {
-        const updates = {};
-        updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
-updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
-        await update(ref(db), updates);
-        cerrarModales();
+        const res = await fetch(`${WORKER_URL}/api/guardar-casilla`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Vendor-Key': vendorKey
+          },
+          body: JSON.stringify({
+            carton: cartonActual,
+            num: casillaSeleccionada,
+            e: estado,
+            d: dias,
+            n: nombre,
+            t: tel,
+            v: vendedor
+          })
+        });
+
+        if (res.ok) {
+          cerrarModales();
+        } else {
+          const err = await res.json();
+          await mostrarAlerta(err.error || "Acceso denegado: Clave inválida.", "Error de Seguridad");
+        }
       } catch (error) {
         console.error("Error al guardar:", error);
-        await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
+        await mostrarAlerta("Error al conectar con el servidor.", "Error de Seguridad");
       }
     };
 
+    // LIBERAR CASILLA VÍA WORKER
+    document.getElementById('btn-liberar-casilla').onclick = async () => {
+      if (!casillaSeleccionada || !vendorKey) {
+        await mostrarAlerta("No tienes autorización para liberar esta casilla.", "Acceso Denegado");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/liberar-casilla`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Vendor-Key': vendorKey
+          },
+          body: JSON.stringify({
+            carton: cartonActual,
+            num: casillaSeleccionada
+          })
+        });
+
+        if (res.ok) {
+          cerrarModales();
+        } else {
+          const err = await res.json();
+          await mostrarAlerta(err.error || "Acceso denegado: Clave inválida.", "Error de Seguridad");
+        }
+      } catch (error) {
+        console.error("Error al liberar:", error);
+        await mostrarAlerta("Error al conectar con el servidor.", "Error de Seguridad");
+      }
+    };
     // LIBERAR CASILLA EN EL CARTÓN ACTUAL
     document.getElementById('btn-liberar-casilla').onclick = async () => {
   if (!casillaSeleccionada || !vendorKey) {
