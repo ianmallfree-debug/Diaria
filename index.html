@@ -601,8 +601,14 @@
     // CONFIGURACIÓN DEL WORKER Y MODO VENDEDOR
     const WORKER_URL = "https://diaria.ianmallfree.workers.dev";
     const urlParams = new URLSearchParams(window.location.search);
-    let vendorKey = urlParams.get('key') || '';
-    const esVendedor = vendorKey.length > 0;    // GENERAR CUADRÍCULA 00-99
+    let vendorKey = urlParams.get('key') || localStorage.getItem('vendor_key') || '';
+    if (urlParams.has('key')) {
+      localStorage.setItem('vendor_key', vendorKey);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    const esVendedor = vendorKey.length > 0;
+    
+    // GENERAR CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
     for (let i = 0; i < 100; i++) {
       const num = i.toString().padStart(2, '0');
@@ -879,72 +885,60 @@
           const pinIngresado = await pedirDato("Acceso Administrador", "Introduce el PIN de seguridad:", "", "password");
           if (!pinIngresado) return;
 
-          let pinReal = "778899";
-          try {
-            const pinSnap = await get(ref(db, 'config/adminPin'));
-            if (pinSnap.exists() && pinSnap.val()) {
-              pinReal = String(pinSnap.val());
+          const opcion = await pedirDato(
+            "Panel Administrador",
+            "1: Limpiar Tablero | 2: Precio Puesto | 3: Cambiar PIN | 4: Cambiar Fecha | 5: Clave Vendedores | 6: Crear Nuevo Cartón",
+            "1",
+            "number"
+          );
+
+          if (!opcion) return;
+
+          let valor = "";
+          let extra = null;
+
+          if (opcion === "1") {
+            const confirm = await pedirDato("Confirmar", `¿Limpiar todo el cartón "${cartonActual}"? (Escribe SI):`, "");
+            if (confirm !== "SI") return;
+            valor = cartonActual;
+          } else if (opcion === "2") {
+            valor = await pedirDato("Valor Puesto", "Escribe el nuevo valor del puesto:", document.getElementById('lbl-precio').textContent);
+          } else if (opcion === "3") {
+            valor = await pedirDato("Cambiar PIN", "Ingresa el nuevo PIN de seguridad:", "", "password");
+          } else if (opcion === "4") {
+            valor = await pedirDato("Cambiar Fecha Activa", "Formato YYYY-MM-DD:", fechaHoy);
+          } else if (opcion === "5") {
+            valor = await pedirDato("Clave Vendedores", "Escribe la nueva clave secreta para vendedores:", "");
+          } else if (opcion === "6") {
+            const nomCarton = await pedirDato("Nuevo Cartón", "Nombre del Cartón (Ej: Sorteo Especial):", "");
+            if (nomCarton) {
+              const precioCarton = await pedirDato("Precio del Cartón", "Valor del puesto para este cartón:", "2000");
+              valor = "carton_" + Date.now();
+              extra = { nombre: nomCarton, precio: precioCarton || "2000" };
             }
-          } catch (e) {
-            console.log("PIN leído con fallback local");
           }
 
-          if (pinIngresado === String(pinReal)) {
-            const opcion = await pedirDato(
-              "Panel Administrador",
-              "1: Limpiar Tablero | 2: Precio Puesto | 3: Cambiar PIN | 4: Cambiar Fecha | 5: Clave Vendedores | 6: Crear Nuevo Cartón",
-              "1",
-              "number"
-            );
+          if (valor) {
+            try {
+              const res = await fetch(`${WORKER_URL}/api/admin-accion`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Admin-Pin': pinIngresado
+                },
+                body: JSON.stringify({ accion: opcion, valor, extra })
+              });
 
-            if (opcion === "6") {
-              const nomCarton = await pedirDato("Nuevo Cartón", "Nombre del Cartón (Ej: Sorteo Especial):", "");
-              if (nomCarton) {
-                const precioCarton = await pedirDato("Precio del Cartón", "Valor del puesto para este cartón:", "2000");
-                const idCarton = "carton_" + Date.now();
-                const updates = {};
-                
-                // DATOS PÚBLICOS (Solo nombre y precio, sin clave vk)
-                updates[`config/cartones/${idCarton}`] = {
-                  nombre: nomCarton,
-                  precio: precioCarton || "2000"
-                };
-                
-                // DATOS PRIVADOS (La clave vk se envía únicamente a rifas_privadas)
-                if (vendorKey) {
-                  updates[`rifas_privadas/${vendorKey}/${idCarton}/init`] = {
-                    vk: vendorKey
-                  };
-                }                
-                await update(ref(db), updates);
-                await mostrarAlerta(`Cartón "${nomCarton}" creado exitosamente.`, "Éxito");
+              if (res.ok) {
+                await mostrarAlerta("Acción ejecutada correctamente.", "Éxito");
+              } else {
+                const err = await res.json();
+                await mostrarAlerta(err.error || "PIN incorrecto o acción no permitida.", "Acceso Denegado");
               }
-            } else if (opcion === "5") {
-              const nuevaClave = await pedirDato("Clave Vendedores", "Escribe la nueva clave secreta para vendedores:", "");
-              if (nuevaClave) {
-                await set(ref(db, 'config/vendorKey'), nuevaClave);
-                await mostrarAlerta(`Clave guardada en Firebase. Tu enlace de vendedores será: ?key=${nuevaClave}`, "Éxito");
-              }
-            } else if (opcion === "2") {
-              const nuevoVal = await pedirDato("Valor Puesto", "Escribe el valor del puesto:", document.getElementById('lbl-precio').textContent);
-              if (nuevoVal) {
-                await set(ref(db, 'config/valorPuesto'), nuevoVal);
-              }
-            } else if (opcion === "3") {
-              const nuevoPin = await pedirDato("Cambiar PIN", "Ingresa el nuevo PIN de seguridad:", "", "password");
-              if (nuevoPin) {
-                await set(ref(db, 'config/adminPin'), nuevoPin);
-                await mostrarAlerta("PIN actualizado exitosamente.", "Éxito");
-              }
-            } else if (opcion === "4") {
-              const f = await pedirDato("Cambiar Fecha Activa", "Formato YYYY-MM-DD:", fechaHoy);
-              if (f) {
-                await set(ref(db, 'config/activeDate'), f);
-              }
+            } catch (err) {
+              await mostrarAlerta("Error al conectar con el servidor.", "Error");
             }
-          } else {            await mostrarAlerta("El PIN ingresado es incorrecto.", "Acceso Denegado");
-          }
-        }
+          }        }
       } else {
         seq = 0; nequiClicks = 0;
       }
