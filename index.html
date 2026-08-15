@@ -567,9 +567,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, remove, onChildAdded, onChildChanged, onChildRemoved, onValue, get } 
+    import { getDatabase, ref, set, remove, update, onChildAdded, onChildChanged, onChildRemoved, onValue, get } 
       from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
     const firebaseConfig = {
       databaseURL: "https://diaria-95fb5-default-rtdb.firebaseio.com"
     };
@@ -718,15 +717,14 @@
         localStorage.setItem('mi_id_vendedor', vendedor);
       }
 
-      // DATOS PÚBLICOS (Solo lo necesario para pintar el tablero sin teléfonos)
+      // DATOS PÚBLICOS (Sin 'vk' ni datos sensibles)
       const payloadPublico = {
         e: estado,
         d: dias,
-        n: nombre,
-        vk: vendorKey
+        n: nombre
       };
 
-      // DATOS PRIVADOS (Teléfono y Vendedor van a una rama protegida)
+      // DATOS PRIVADOS (Teléfono, Vendedor y la clave 'vk')
       const payloadPrivado = {
         t: tel,
         v: vendedor,
@@ -734,8 +732,10 @@
       };
 
       try {
-        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payloadPublico);
-        await set(ref(db, `rifas_privadas/${fechaHoy}/${casillaSeleccionada}`), payloadPrivado);
+        const updates = {};
+        updates[`rifas/${fechaHoy}/${casillaSeleccionada}`] = payloadPublico;
+        updates[`rifas_privadas/${fechaHoy}/${casillaSeleccionada}`] = payloadPrivado;
+        await update(ref(db), updates);
         cerrarModales();
       } catch (error) {
         console.error("Error al guardar:", error);
@@ -743,6 +743,24 @@
       }
     };
 
+    // LIBERAR CASILLA EN AMBAS RAMAS
+    document.getElementById('btn-liberar-casilla').onclick = async () => {
+      if (!casillaSeleccionada) return;
+      
+      const payloadPublico = { e: 0, d: 1, n: "" };
+      const payloadPrivado = { t: "", v: "", vk: vendorKey };
+
+      try {
+        const updates = {};
+        updates[`rifas/${fechaHoy}/${casillaSeleccionada}`] = payloadPublico;
+        updates[`rifas_privadas/${fechaHoy}/${casillaSeleccionada}`] = payloadPrivado;
+        await update(ref(db), updates);
+        cerrarModales();
+      } catch (error) {
+        console.error("Error al liberar:", error);
+        await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
+      }
+    };
     // LIBERAR CASILLA EN AMBAS RAMAS
     document.getElementById('btn-liberar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
