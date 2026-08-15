@@ -603,7 +603,7 @@
     // DETECTAR MODO VENDEDOR VÍA URL (?key=CLAVE)
     const urlParams = new URLSearchParams(window.location.search);
     let vendorKey = urlParams.get('key') || '';
-    const esVendedor = Boolean(vendorKey);
+    const esVendedor = vendorKey.length > 0;
 
     // GENERAR CUADRÍCULA 00-99
     const tablero = document.getElementById('tablero');
@@ -758,7 +758,7 @@
       try {
         const updates = {};
         updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
-        updates[`rifas_privadas/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
+updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
         await update(ref(db), updates);
         cerrarModales();
       } catch (error) {
@@ -769,23 +769,44 @@
 
     // LIBERAR CASILLA EN EL CARTÓN ACTUAL
     document.getElementById('btn-liberar-casilla').onclick = async () => {
-      if (!casillaSeleccionada) return;
-      
-      const payloadPublico = { e: 0, d: 1, n: "" };
-      const payloadPrivado = { t: "", v: "", vk: vendorKey };
+  if (!casillaSeleccionada || !vendorKey) {
+    await mostrarAlerta(
+      "No tienes autorización para liberar esta casilla.",
+      "Acceso Denegado"
+    );
+    return;
+  }
 
-      try {
-        const updates = {};
-        updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
-        if (vendorKey) {
-          updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
-        }
-        await update(ref(db), updates);
-        cerrarModales();
-      } catch (error) {        console.error("Error al liberar:", error);
-        await mostrarAlerta("Acceso denegado: Clave de vendedor inválida.", "Error de Seguridad");
-      }
-    };
+  const payloadPublico = {
+    e: 0,
+    d: 1,
+    n: ""
+  };
+
+  const payloadPrivado = {
+    t: "",
+    v: "",
+    vk: vendorKey
+  };
+
+  try {
+    const updates = {};
+
+    updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
+    updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
+
+    await update(ref(db), updates);
+
+    cerrarModales();
+  } catch (error) {
+    console.error("Error al liberar:", error);
+
+    await mostrarAlerta(
+      "Acceso denegado: Clave de vendedor inválida.",
+      "Error de Seguridad"
+    );
+  }
+};
     function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
       return new Promise((resolve) => {
         const modal = document.getElementById('modal-dialogo');
