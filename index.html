@@ -706,44 +706,49 @@
       document.getElementById('modal-casilla').style.display = 'flex';
     }
 
-    // --- ACCIÓN DE GUARDAR (INCLUYE 'vk' PARA QUE FIREBASE ACEPTE LA ESCRITURA) ---
+    // GUARDAR CASILLA CUMPLIENDO LA REGLA DE FIREBASE (VK)
     document.getElementById('btn-guardar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
+      
+      const estado = parseInt(document.getElementById('f-estado').value) || 1;
+      const dias = parseInt(document.getElementById('f-dias').value) || 1;
+      const nombre = document.getElementById('f-nombre').value.trim();
+      const tel = document.getElementById('f-tel').value.trim();
+      const vendedor = document.getElementById('f-vendedor').value.trim();
 
+      if (vendedor) {
+        localStorage.setItem('mi_id_vendedor', vendedor);
+      }
+
+      // IMPORTANTE: Se envía vk con la clave de la URL para que Firebase apruebe la escritura
       const payload = {
-        e: parseInt(document.getElementById('f-estado').value),
-        d: parseInt(document.getElementById('f-dias').value) || 1,
-        n: document.getElementById('f-nombre').value.trim(),
-        t: document.getElementById('f-tel').value.trim(),
-        v: document.getElementById('f-vendedor').value.trim(),
-        vk: vendorKey // <--- ¡CLAVE EXIGIDA POR TUS REGLAS DE FIREBASE!
+        e: estado,
+        d: dias,
+        n: nombre,
+        t: tel,
+        v: vendedor,
+        vk: vendorKey
       };
 
       try {
         await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payload);
         cerrarModales();
-      } catch (err) {
-        console.error("Error al guardar:", err);
-        await mostrarAlerta("No tienes permiso para guardar. Clave inválida.", "Error Firebase");
+      } catch (error) {
+        console.error("Error al guardar:", error);
+        await mostrarAlerta("Error de permisos en Firebase: " + error.message, "Error");
       }
     };
 
-    // --- ACCIÓN DE LIBERAR / ELIMINAR ---
+    // LIBERAR CASILLA
     document.getElementById('btn-liberar-casilla').onclick = async () => {
       if (!casillaSeleccionada) return;
       try {
         await remove(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`));
         cerrarModales();
-      } catch (err) {
-        console.error("Error al eliminar:", err);
+      } catch (error) {
+        console.error("Error al liberar:", error);
+        await mostrarAlerta("No se pudo liberar la casilla: " + error.message, "Error");
       }
-    };
-
-    v
-
-    document.getElementById('btn-liberar-casilla').onclick = () => {
-      remove(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`));
-      cerrarModales();
     };
 
     // GESTOR DE DIÁLOGOS PERSONALIZADOS (REEMPLAZO DE PROMPT/ALERT)
