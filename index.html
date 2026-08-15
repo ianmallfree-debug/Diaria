@@ -884,11 +884,20 @@
               if (nomCarton) {
                 const precioCarton = await pedirDato("Precio del Cartón", "Valor del puesto para este cartón:", "2000");
                 const idCarton = "carton_" + Date.now();
-                await set(ref(db, `config/cartones/${idCarton}`), {
+                const updates = {};
+                
+                // DATOS PÚBLICOS (Solo nombre y precio, sin clave vk)
+                updates[`config/cartones/${idCarton}`] = {
                   nombre: nomCarton,
-                  precio: precioCarton || "2000",
+                  precio: precioCarton || "2000"
+                };
+                
+                // DATOS PRIVADOS (La clave vk se envía únicamente a rifas_privadas)
+                updates[`rifas_privadas/${idCarton}/init`] = {
                   vk: vendorKey
-                });
+                };
+                
+                await update(ref(db), updates);
                 await mostrarAlerta(`Cartón "${nomCarton}" creado exitosamente.`, "Éxito");
               }
             } else if (opcion === "5") {
