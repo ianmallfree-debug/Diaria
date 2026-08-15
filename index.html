@@ -706,6 +706,39 @@
       document.getElementById('modal-casilla').style.display = 'flex';
     }
 
+    // --- ACCIÓN DE GUARDAR (INCLUYE 'vk' PARA QUE FIREBASE ACEPTE LA ESCRITURA) ---
+    document.getElementById('btn-guardar-casilla').onclick = async () => {
+      if (!casillaSeleccionada) return;
+
+      const payload = {
+        e: parseInt(document.getElementById('f-estado').value),
+        d: parseInt(document.getElementById('f-dias').value) || 1,
+        n: document.getElementById('f-nombre').value.trim(),
+        t: document.getElementById('f-tel').value.trim(),
+        v: document.getElementById('f-vendedor').value.trim(),
+        vk: vendorKey // <--- ¡CLAVE EXIGIDA POR TUS REGLAS DE FIREBASE!
+      };
+
+      try {
+        await set(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`), payload);
+        cerrarModales();
+      } catch (err) {
+        console.error("Error al guardar:", err);
+        await mostrarAlerta("No tienes permiso para guardar. Clave inválida.", "Error Firebase");
+      }
+    };
+
+    // --- ACCIÓN DE LIBERAR / ELIMINAR ---
+    document.getElementById('btn-liberar-casilla').onclick = async () => {
+      if (!casillaSeleccionada) return;
+      try {
+        await remove(ref(db, `rifas/${fechaHoy}/${casillaSeleccionada}`));
+        cerrarModales();
+      } catch (err) {
+        console.error("Error al eliminar:", err);
+      }
+    };
+
     v
 
     document.getElementById('btn-liberar-casilla').onclick = () => {
