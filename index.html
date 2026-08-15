@@ -803,47 +803,7 @@
         await mostrarAlerta("Error al conectar con el servidor.", "Error de Seguridad");
       }
     };
-    // LIBERAR CASILLA EN EL CARTÓN ACTUAL
-    document.getElementById('btn-liberar-casilla').onclick = async () => {
-  if (!casillaSeleccionada || !vendorKey) {
-    await mostrarAlerta(
-      "No tienes autorización para liberar esta casilla.",
-      "Acceso Denegado"
-    );
-    return;
-  }
-
-  const payloadPublico = {
-    e: 0,
-    d: 1,
-    n: ""
-  };
-
-  const payloadPrivado = {
-    t: "",
-    v: "",
-    vk: vendorKey
-  };
-
-  try {
-    const updates = {};
-
-    updates[`rifas/${cartonActual}/${casillaSeleccionada}`] = payloadPublico;
-    updates[`rifas_privadas/${vendorKey}/${cartonActual}/${casillaSeleccionada}`] = payloadPrivado;
-
-    await update(ref(db), updates);
-
-    cerrarModales();
-  } catch (error) {
-    console.error("Error al liberar:", error);
-
-    await mostrarAlerta(
-      "Acceso denegado: Clave de vendedor inválida.",
-      "Error de Seguridad"
-    );
-  }
-};
-    function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
+        function pedirDato(titulo, descripcion, valorInicial = '', tipo = 'text') {
       return new Promise((resolve) => {
         const modal = document.getElementById('modal-dialogo');
         const input = document.getElementById('diag-input');
