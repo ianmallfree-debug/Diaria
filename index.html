@@ -226,9 +226,9 @@
       text-transform: uppercase;
       letter-spacing: 0.4px;
     }
-    .tag-disp { background: var(--casilla-libre); color: #ffffff; border: 1px solid #3a3f4d; }
-    .tag-apar { background: var(--amber-apartado); color: #ffffff; }
-    .tag-paga { background: var(--green-pagado); color: #ffffff; }
+    .tag-disp { background: #dce3db; color: #073819; }
+    .tag-apar { background: #d49206; color: #ffffff; }
+    .tag-paga { background: #0e4822; color: #ffffff; }
 
     /* CUADRÍCULA */
     .grid-container {
@@ -244,9 +244,9 @@
     }
 
     .casilla {
-      background: var(--casilla-libre);
-      color: #ffffff;
-      border: 1px solid #262a36;
+      background: #dce3db;
+      color: #073819;
+      border: 1px solid #c0c9bf;
       border-radius: 3px;
       aspect-ratio: 0.78;
       display: flex;
@@ -262,7 +262,7 @@
       font-size: 0.9rem;
       font-weight: 900;
       margin-bottom: 2px;
-      color: #ffffff;
+      color: #073819;
     }
     .casilla .nombre {
       font-size: 0.46rem;
@@ -272,22 +272,28 @@
       white-space: nowrap;
       overflow: hidden;
       max-width: 96%;
-      color: #ffd77a;
+      color: #073819;
     }
 
     .casilla.apartado {
-      background: var(--amber-apartado);
-      border-color: #ffaa33;
+      background: #d49206;
+      border-color: #f5aa14;
       color: #ffffff;
     }
-    .casilla.apartado .nombre { color: #ffffff; }
+    .casilla.apartado .num,
+    .casilla.apartado .nombre {
+      color: #ffffff;
+    }
 
     .casilla.pagado {
-      background: var(--green-pagado);
-      border-color: #00c853;
+      background: #0e4822;
+      border-color: #176833;
       color: #ffffff;
     }
-    .casilla.pagado .nombre { color: #ffffff; }
+    .casilla.pagado .num,
+    .casilla.pagado .nombre {
+      color: #ffffff;
+    }
 
     .casilla .tag-dias {
       position: absolute;
@@ -299,76 +305,83 @@
       color: #fff;
       padding: 0.5px 1.5px;
       border-radius: 2px;
-    }
-
-    /* FOOTER PREMIOS */
+    }/* FOOTER PREMIOS */
     .prizes-footer {
       display: flex;
       justify-content: space-between;
-      background: #0a0c10;
-      border: 1px solid #262111;
+      align-items: stretch;
+      background: #090a0d;
+      border: 1.5px solid rgba(212, 175, 55, 0.35);
       border-radius: 8px;
-      padding: 6px 3px;
+      padding: 5px 4px;
       color: #ffffff;
       text-align: center;
       position: relative;
       margin: 8px 10px 0;
-      gap: 4px;
+      gap: 5px;
     }
     .prize-box {
       flex: 1;
-      padding: 4px 2px;
+      padding: 5px 2px;
       border-radius: 6px;
-      background: #11141a;
+      background: #12141a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      transition: all 0.2s ease;
     }
+
+    /* Caja destacada del premio mayor (Últimas) */
     .prize-box.prize-ultimas {
-      border: 1px solid var(--purple-neon);
-      box-shadow: 0 0 6px rgba(224, 86, 253, 0.25);
-    }
-    .prize-box.prize-primeras {
-      border: 1px solid var(--blue-neon);
-      box-shadow: 0 0 6px rgba(0, 210, 255, 0.25);
-    }
-    .prize-box.prize-medio {
-      border: 1px solid var(--green-neon);
-      box-shadow: 0 0 6px rgba(0, 230, 118, 0.25);
+      flex: 1.28;
+      background: radial-gradient(circle at center, #241d08 0%, #120f06 100%);
+      border: 1.5px solid var(--gold-border);
+      box-shadow: 0 0 10px rgba(245, 175, 25, 0.22);
     }
 
     .prize-title-cat {
-      font-size: 0.52rem;
+      font-size: 0.5rem;
       font-family: 'Segoe UI', Roboto, sans-serif;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
       margin-bottom: 2px;
       line-height: 1.1;
+      color: #9aa1ad;
     }
-    .prize-ultimas .prize-title-cat { color: var(--purple-neon); }
-    .prize-primeras .prize-title-cat { color: var(--blue-neon); }
-    .prize-medio .prize-title-cat { color: var(--green-neon); }
+    .prize-ultimas .prize-title-cat {
+      color: var(--gold-main);
+      font-size: 0.55rem;
+      text-shadow: 0 0 5px rgba(245, 175, 25, 0.35);
+    }
 
     .prize-amount {
-      font-size: 1.35rem;
+      font-size: 1.15rem;
       font-weight: 900;
       line-height: 1;
-      color: var(--gold-light);
+      color: #e3e6ed;
     }
-    .prize-ultimas .prize-amount { text-shadow: 0 0 6px rgba(255,229,127,0.5); }
+    .prize-ultimas .prize-amount {
+      font-size: 1.48rem;
+      color: var(--gold-light);
+      text-shadow: 0 0 8px rgba(255, 229, 127, 0.6);
+    }
 
     .prize-desc {
-      font-size: 0.52rem;
+      font-size: 0.48rem;
       font-family: Arial, sans-serif;
       font-weight: bold;
-      color: #9ea4b0;
+      color: #6b7280;
       margin-top: 2px;
     }
+    .prize-ultimas .prize-desc {
+      color: #b8860b;
+      font-size: 0.52rem;
+    }
 
-    /* MODALES VIP */
-    .modal-overlay {
+    /* MODALES VIP */    .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
@@ -540,11 +553,6 @@
 
     <!-- FOOTER PREMIOS -->
     <div class="prizes-footer">
-      <div class="prize-box prize-ultimas">
-        <div class="prize-title-cat">ÚLTIMAS</div>
-        <div class="prize-amount">$100k</div>
-        <div class="prize-desc">2 Cifras</div>
-      </div>
       <div class="prize-box prize-primeras">
         <div class="prize-title-cat">PRIMERAS</div>
         <div class="prize-amount">$20k</div>
@@ -555,34 +563,46 @@
         <div class="prize-amount">$20k</div>
         <div class="prize-desc">2 Cifras</div>
       </div>
+      <div class="prize-box prize-ultimas">
+        <div class="prize-title-cat">ÚLTIMAS</div>
+        <div class="prize-amount">$100k</div>
+        <div class="prize-desc">2 Cifras</div>
+      </div>
     </div>
 
   </div>
   <div class="modal-overlay" id="modal-ganadores">
     <div class="winners-card">
       <h2 class="winners-title">¡FELICIDADES GANADORES!</h2>
+      <div style="font-size:1.6rem; font-weight:900; letter-spacing:4px; color:#ffe57f; margin-bottom:2px; text-shadow:0 0 10px rgba(255,229,127,0.5);">
+        SORTEO: <span id="g-sorteo-4d">----</span>
+      </div>
+      <div id="g-sorteo-fecha" style="font-size:0.75rem; color:#cbd3e1; font-family:'Segoe UI', sans-serif; font-weight:bold; margin-bottom:12px;"></div>
       
+      <!-- 1. ÚLTIMAS 2 CIFRAS ($100k) -->
       <div class="winner-row">
-        <div class="winner-badge" id="g-num-1">02</div>
+        <div class="winner-badge" id="g-num-1">--</div>
         <div class="winner-info">
-          <div class="premio">$100k</div>
-          <div class="cliente" id="g-nom-1">,Fabián</div>
+          <div class="premio">$100k <span style="font-size:0.65rem; color:#a0a5b0;">(ÚLTIMAS)</span></div>
+          <div class="cliente" id="g-nom-1">Sin Ganador</div>
         </div>
       </div>
 
+      <!-- 2. CIFRAS DEL MEDIO ($20k) -->
       <div class="winner-row">
-        <div class="winner-badge" id="g-num-2">13</div>
+        <div class="winner-badge" id="g-num-2">--</div>
         <div class="winner-info">
-          <div class="premio">$20k</div>
-          <div class="cliente" id="g-nom-2">barajas</div>
+          <div class="premio">$20k <span style="font-size:0.65rem; color:#a0a5b0;">(DEL MEDIO)</span></div>
+          <div class="cliente" id="g-nom-2">Sin Ganador</div>
         </div>
       </div>
 
+      <!-- 3. PRIMERAS 2 CIFRAS ($20k) -->
       <div class="winner-row">
-        <div class="winner-badge" id="g-num-3">30</div>
+        <div class="winner-badge" id="g-num-3">--</div>
         <div class="winner-info">
-          <div class="premio">$20k</div>
-          <div class="cliente" id="g-nom-3">barajas</div>
+          <div class="premio">$20k <span style="font-size:0.65rem; color:#a0a5b0;">(PRIMERAS)</span></div>
+          <div class="cliente" id="g-nom-3">Sin Ganador</div>
         </div>
       </div>
 
@@ -646,13 +666,20 @@
       databaseURL: "https://diaria-95fb5-default-rtdb.firebaseio.com"
     };
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);    function actualizarReloj() {
+    const db = getDatabase(app);    
+    function actualizarReloj() {
       const ahora = new Date();
       const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
       
       const txtFecha = `${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getFullYear()}`;
-      const txtHora = ahora.toTimeString().substring(0, 5);
+      
+      let horas = ahora.getHours();
+      const minutos = ahora.getMinutes().toString().padStart(2, '0');
+      const ampm = horas >= 12 ? 'PM' : 'AM';
+      horas = horas % 12;
+      horas = horas ? horas : 12;
+      const txtHora = `🕒 ${horas}:${minutos} ${ampm}`;
 
       document.getElementById('lbl-fecha-texto').textContent = txtFecha;
       document.getElementById('lbl-hora').textContent = txtHora;
@@ -977,17 +1004,23 @@
       const p20k_2 = numero4D.substring(1, 3); // '23' (2 cifras del medio -> $20k)
       const p100k  = numero4D.substring(2, 4); // '34' (Últimas 2 cifras -> $100k)
 
-      // 1. Premio Mayor $100k (Últimas 2 cifras)
+      // Encabezado del sorteo
+      document.getElementById('g-sorteo-4d').textContent = numero4D;
+      const fechaModal = document.getElementById('lbl-fecha-texto').textContent;
+      const horaModal = document.getElementById('lbl-hora').textContent.replace('🕒 ', '');
+      document.getElementById('g-sorteo-fecha').textContent = `${fechaModal} • ${horaModal}`;
+
+      // 1. Premio Mayor $100k (Últimas 2 cifras - Primero arriba)
       document.getElementById('g-num-1').textContent = p100k;
       document.getElementById('g-nom-1').textContent = datosTablero[p100k]?.n ? `${datosTablero[p100k].n}` : 'Sin Ganador';
 
-      // 2. Premio $20k (Primeras 2 cifras)
-      document.getElementById('g-num-2').textContent = p20k_1;
-      document.getElementById('g-nom-2').textContent = datosTablero[p20k_1]?.n ? `${datosTablero[p20k_1].n}` : 'Sin Ganador';
+      // 2. Premio $20k (2 Cifras del medio - Segundo en el centro)
+      document.getElementById('g-num-2').textContent = p20k_2;
+      document.getElementById('g-nom-2').textContent = datosTablero[p20k_2]?.n ? `${datosTablero[p20k_2].n}` : 'Sin Ganador';
 
-      // 3. Premio $20k (2 Cifras del medio)
-      document.getElementById('g-num-3').textContent = p20k_2;
-      document.getElementById('g-nom-3').textContent = datosTablero[p20k_2]?.n ? `${datosTablero[p20k_2].n}` : 'Sin Ganador';
+      // 3. Premio $20k (Primeras 2 cifras - Tercero abajo)
+      document.getElementById('g-num-3').textContent = p20k_1;
+      document.getElementById('g-nom-3').textContent = datosTablero[p20k_1]?.n ? `${datosTablero[p20k_1].n}` : 'Sin Ganador';
 
       document.getElementById('modal-casilla').style.display = 'none';
       document.getElementById('modal-ganadores').style.display = 'flex';
